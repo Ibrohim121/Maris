@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Hero from "@/components/Hero";
 import CourseCard from "@/components/CourseCard";
 import IndustryElite from "@/components/IndustryElite";
 import { useLang } from "@/context/LangContext";
 import { useTranslation } from "@/translations";
+import { useAuth } from "@/context/AuthContext";
 
 const courses = [
   { title: "Advanced Machine Learning", price: "$249", instructor: "Dr. Sarah Chen" },
@@ -13,8 +16,21 @@ const courses = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
+  const router = useRouter();
   const { locale } = useLang();
   const t = useTranslation(locale);
+
+  useEffect(() => {
+    if (user) {
+      const redirects: Record<string, string> = {
+        student: "/student/dashboard",
+        admin: "/admin/dashboard",
+        teacher: "/teacher",
+      };
+      router.replace(redirects[user.role] || "/");
+    }
+  }, [user, router]);
 
   return (
     <div className="font-sans">

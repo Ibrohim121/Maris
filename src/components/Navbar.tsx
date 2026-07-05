@@ -3,16 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, LayoutDashboard, Calendar, CreditCard, Users, Star } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import { locales, useTranslation } from "@/translations";
 
-const navLinks = [
+const guestLinks = [
   { key: "nav.home", href: "/" },
   { key: "nav.courses", href: "#courses" },
   { key: "nav.teachers", href: "/teachers" },
   { key: "nav.contact", href: "#contact" },
+];
+
+const studentLinks = [
+  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
+  { label: "Schedule", href: "/student/schedule", icon: Calendar },
+  { label: "Payment", href: "/student/payment", icon: CreditCard },
+  { label: "Group", href: "/student/group", icon: Users },
+  { label: "Rating", href: "/student/rating", icon: Star },
 ];
 
 export default function Navbar() {
@@ -30,26 +38,40 @@ export default function Navbar() {
 
   const currentLang = locales.find((l) => l.code === locale)?.label ?? "EN";
 
+  const isStudent = user?.role === "student";
+
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
-            <Link href="/">
+            <Link href={isStudent ? "/student/dashboard" : "/"}>
               <img src="/maris-logo.jpg" alt="Maris Logo" className="h-12 w-auto" />
             </Link>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
-              >
-                {t(link.key)}
-              </Link>
-            ))}
+            {!user &&
+              guestLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
+                >
+                  {t(link.key)}
+                </Link>
+              ))}
+            {isStudent &&
+              studentLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
+                >
+                  <link.icon size={16} />
+                  {link.label}
+                </Link>
+              ))}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -80,14 +102,6 @@ export default function Navbar() {
 
             {user ? (
               <div className="flex items-center gap-3">
-                {user.role === "student" && (
-                  <Link
-                    href="/student/dashboard"
-                    className="text-sm font-medium text-gray-600 hover:text-[#FFD700] transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                )}
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
                     {user.avatar}
@@ -125,16 +139,29 @@ export default function Navbar() {
 
       {open && (
         <div className="md:hidden border-t border-gray-200 bg-white px-4 pb-4 pt-2 space-y-3">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="block text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
-            >
-              {t(link.key)}
-            </Link>
-          ))}
+          {!user &&
+            guestLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="block text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
+              >
+                {t(link.key)}
+              </Link>
+            ))}
+          {isStudent &&
+            studentLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
+              >
+                <link.icon size={16} />
+                {link.label}
+              </Link>
+            ))}
           <div className="pt-2 flex flex-wrap gap-2">
             {locales.map((l) => (
               <button
@@ -150,30 +177,19 @@ export default function Navbar() {
           </div>
           <div className="pt-2 border-t border-gray-100">
             {user ? (
-              <div className="space-y-2">
-                {user.role === "student" && (
-                  <Link
-                    href="/student/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="block text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                )}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
-                      {user.avatar}
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{user.name}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
+                    {user.avatar}
                   </div>
-                  <button
-                    onClick={handleSignOut}
-                    className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
-                  >
-                    {t("nav.logout")}
-                  </button>
+                  <span className="text-sm font-medium text-gray-700">{user.name}</span>
                 </div>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
+                >
+                  {t("nav.logout")}
+                </button>
               </div>
             ) : (
               <Link

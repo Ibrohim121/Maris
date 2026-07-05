@@ -1,13 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { teachers } from "@/data/teachers";
 import TeacherCard from "@/components/TeacherCard";
 import { useLang } from "@/context/LangContext";
 import { useTranslation } from "@/translations";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TeachersPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const { locale } = useLang();
   const t = useTranslation(locale);
+
+  useEffect(() => {
+    if (user) {
+      const redirects: Record<string, string> = {
+        student: "/student/dashboard",
+        admin: "/admin/dashboard",
+        teacher: "/teacher",
+      };
+      router.replace(redirects[user.role] || "/");
+    }
+  }, [user, router]);
 
   return (
     <main className="bg-white px-4 sm:px-6 lg:px-8 py-20 lg:py-28">

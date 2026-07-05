@@ -1,19 +1,35 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { teachers } from "@/data/teachers";
 import { ArrowLeft, Star, Users, BookOpen } from "lucide-react";
 import { useLang } from "@/context/LangContext";
 import { useTranslation } from "@/translations";
+import { useAuth } from "@/context/AuthContext";
 
 interface Props {
   params: { slug: string };
 }
 
 export default function TeacherPage({ params }: Props) {
+  const { user } = useAuth();
+  const router = useRouter();
   const { locale } = useLang();
   const t = useTranslation(locale);
+
+  useEffect(() => {
+    if (user) {
+      const redirects: Record<string, string> = {
+        student: "/student/dashboard",
+        admin: "/admin/dashboard",
+        teacher: "/teacher",
+      };
+      router.replace(redirects[user.role] || "/");
+    }
+  }, [user, router]);
+
   const teacher = teachers.find((t) => t.slug === params.slug);
 
   if (!teacher) notFound();
