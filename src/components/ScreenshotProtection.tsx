@@ -11,7 +11,7 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
 
   const flash = useCallback(() => {
     setHidden(true);
-    setTimeout(() => setHidden(false), 10000);
+    setTimeout(() => setHidden(false), 20000);
   }, []);
 
   useEffect(() => {
