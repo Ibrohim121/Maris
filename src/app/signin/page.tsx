@@ -40,7 +40,7 @@ export default function SignInPage() {
         avatar: result.name.charAt(0).toUpperCase(),
       });
       const redirects: Record<string, string> = {
-        student: "/",
+        student: "/student/dashboard",
         admin: "/admin/dashboard",
         teacher: "/teacher",
       };

@@ -80,6 +80,14 @@ export default function Navbar() {
 
             {user ? (
               <div className="flex items-center gap-3">
+                {user.role === "student" && (
+                  <Link
+                    href="/student/dashboard"
+                    className="text-sm font-medium text-gray-600 hover:text-[#FFD700] transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
                     {user.avatar}
@@ -142,19 +150,30 @@ export default function Navbar() {
           </div>
           <div className="pt-2 border-t border-gray-100">
             {user ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
-                    {user.avatar}
+              <div className="space-y-2">
+                {user.role === "student" && (
+                  <Link
+                    href="/student/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="block text-sm font-medium text-gray-700 hover:text-[#FFD700] transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#FFD700] flex items-center justify-center text-black font-bold text-xs">
+                      {user.avatar}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{user.name}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
+                  >
+                    {t("nav.logout")}
+                  </button>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
-                >
-                  {t("nav.logout")}
-                </button>
               </div>
             ) : (
               <Link
