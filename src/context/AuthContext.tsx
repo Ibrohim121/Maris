@@ -19,14 +19,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("educenter_user");
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch { /* ignore */ }
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("educenter_user");
+      if (stored) {
+        try { return JSON.parse(stored); } catch { /* ignore */ }
+      }
     }
-  }, []);
+    return null;
+  });
 
   const signIn = (u: User) => {
     setUser(u);
