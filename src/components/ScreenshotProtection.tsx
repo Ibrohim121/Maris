@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ScreenshotProtection({ children }: { children: ReactNode }) {
@@ -9,17 +9,32 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
 
   const isStudent = user?.role === "student";
 
+  const flash = useCallback(() => {
+    setHidden(true);
+    setTimeout(() => setHidden(false), 500);
+  }, []);
+
   useEffect(() => {
     if (!isStudent) return;
 
+    let printScreenPressed = false;
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        printScreenPressed = true;
+        flash();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
       if (
-        e.key === "PrintScreen" ||
         (e.ctrlKey && e.shiftKey && (e.key === "S" || e.key === "s")) ||
         (e.ctrlKey && (e.key === "S" || e.key === "s")) ||
         (e.metaKey && e.shiftKey && (e.key === "S" || e.key === "s")) ||
         (e.metaKey && (e.key === "S" || e.key === "s"))
       ) {
+        flash();
         e.preventDefault();
         e.stopPropagation();
       }
@@ -29,6 +44,8 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
       if (e.key === "PrintScreen") {
         e.preventDefault();
         e.stopPropagation();
+        if (!printScreenPressed) flash();
+        printScreenPressed = false;
       }
     };
 
@@ -41,7 +58,9 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
     };
 
     const handleVisibility = () => {
-      setHidden(document.hidden || document.visibilityState === "hidden");
+      if (document.hidden || document.visibilityState === "hidden") {
+        setHidden(true);
+      }
     };
 
     const handleBlur = () => setHidden(true);
@@ -64,7 +83,7 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
       window.removeEventListener("blur", handleBlur);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [isStudent]);
+  }, [isStudent, flash]);
 
   if (!isStudent) return <>{children}</>;
 
@@ -72,6 +91,7 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
     <div
       style={{
         position: "relative",
+        minHeight: "100%",
         userSelect: "none",
         WebkitUserSelect: "none",
         MozUserSelect: "none",
@@ -89,48 +109,14 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
           position: "fixed",
           inset: 0,
           zIndex: 99999,
-          backgroundColor: "#121212",
+          backgroundColor: "#000",
           display: hidden ? "flex" : "none",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
           gap: 16,
         }}
-      >
-        <div
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: "50%",
-            backgroundColor: "#FFD700",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#000",
-          }}
-        >
-          !
-        </div>
-        <p
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: 600,
-          }}
-        >
-          Content Protected
-        </p>
-        <p
-          style={{
-            color: "#9CA3AF",
-            fontSize: 14,
-          }}
-        >
-          Switch back to view the content
-        </p>
-      </div>
+      />
     </div>
   );
 }
