@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 export default function ScreenshotProtection({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const overlayRef = useRef<HTMLDivElement>(null);
-  const protectRef = useRef<HTMLDivElement>(null);
 
   const isStudent = user?.role === "student";
 
@@ -14,69 +13,35 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
     if (!isStudent) return;
 
     const overlay = overlayRef.current;
-    const protect = protectRef.current;
-    if (!overlay || !protect) return;
+    if (!overlay) return;
 
-    let flashTimer: ReturnType<typeof setTimeout> | null = null;
-    let ctrlShiftTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const showOverlay = () => {
+    const show = () => {
       overlay.style.display = "flex";
-      protect.style.filter = "blur(40px)";
-      protect.style.opacity = "0";
-      protect.style.pointerEvents = "none";
       void overlay.offsetHeight;
-      void protect.offsetHeight;
     };
 
-    const hideOverlay = () => {
+    const hide = () => {
       overlay.style.display = "none";
-      protect.style.filter = "none";
-      protect.style.opacity = "1";
-      protect.style.pointerEvents = "auto";
     };
 
-    const flash = () => {
-      showOverlay();
-      if (flashTimer) clearTimeout(flashTimer);
-      flashTimer = setTimeout(hideOverlay, 20000);
-    };
-
-    const clearClipboard = async () => {
-      try {
-        await navigator.clipboard.writeText("");
-      } catch { /* ignore */ }
+    const clearClipboard = () => {
+      try { navigator.clipboard.writeText(""); } catch { /* ignore */ }
     };
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "PrintScreen" || e.code === "PrintScreen") {
-        showOverlay();
+        show();
         clearClipboard();
         e.preventDefault();
         e.stopPropagation();
-        if (!flashTimer) {
-          flashTimer = setTimeout(hideOverlay, 20000);
-        }
         return;
       }
 
       if (e.ctrlKey || e.metaKey) {
-        if (e.shiftKey && (e.key === "S" || e.key === "s")) {
-          showOverlay();
+        if ((e.shiftKey || e.key === "S" || e.key === "s")) {
+          show();
           e.preventDefault();
           e.stopPropagation();
-          if (!flashTimer) {
-            flashTimer = setTimeout(hideOverlay, 20000);
-          }
-          return;
-        }
-        if (e.key === "S" || e.key === "s") {
-          showOverlay();
-          e.preventDefault();
-          e.stopPropagation();
-          if (!flashTimer) {
-            flashTimer = setTimeout(hideOverlay, 20000);
-          }
           return;
         }
       }
@@ -84,13 +49,10 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
 
     document.addEventListener("keyup", (e) => {
       if (e.key === "PrintScreen" || e.code === "PrintScreen") {
-        showOverlay();
+        show();
         clearClipboard();
         e.preventDefault();
         e.stopPropagation();
-        if (!flashTimer) {
-          flashTimer = setTimeout(hideOverlay, 20000);
-        }
       }
     }, true);
 
@@ -110,27 +72,21 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden || document.visibilityState === "hidden") {
-        showOverlay();
+        show();
       } else {
-        setTimeout(hideOverlay, 2000);
+        hide();
       }
     });
 
-    window.addEventListener("blur", () => showOverlay());
-    window.addEventListener("focus", hideOverlay);
+    window.addEventListener("blur", show);
+    window.addEventListener("focus", hide);
 
-    window.addEventListener("resize", () => {
-      if (window.screen.width !== window.innerWidth || window.screen.height !== window.innerHeight) {
-        flash();
-      }
-    });
-
-    document.addEventListener("mouseleave", () => showOverlay(), true);
-    document.addEventListener("mouseenter", hideOverlay, true);
+    document.addEventListener("mouseleave", show, true);
+    document.addEventListener("mouseenter", hide, true);
 
     return () => {
-      if (flashTimer) clearTimeout(flashTimer);
-      if (ctrlShiftTimer) clearTimeout(ctrlShiftTimer);
+      document.removeEventListener("keydown", show, true);
+      document.removeEventListener("keyup", show, true);
     };
   }, [isStudent]);
 
@@ -148,17 +104,7 @@ export default function ScreenshotProtection({ children }: { children: ReactNode
         WebkitTouchCallout: "none",
       }}
     >
-      <div
-        ref={protectRef}
-        style={{
-          position: "relative",
-          filter: "none",
-          opacity: 1,
-          transition: "none",
-        }}
-      >
-        {children}
-      </div>
+      {children}
 
       <div
         ref={overlayRef}
