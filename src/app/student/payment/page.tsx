@@ -39,7 +39,7 @@ export default function PaymentPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">To'lov ma'lumotlari</h2>
+          <h2 className="font-semibold text-gray-900 mb-4">To`lov ma`lumotlari</h2>
 
           <div className="flex flex-col lg:flex-row items-start gap-6">
             <div className="bg-gray-50 rounded-xl p-5 min-w-[280px]">
@@ -61,15 +61,15 @@ export default function PaymentPage() {
 
             <div className="flex-1">
               <p className="text-sm text-gray-700 leading-relaxed">
-                Tolov chekini ssilka ostidagi akauntga yuboring! Maris Academy ni tanlaganingiz uchun minnatdormiz!!
+                To`lov chekini pastdagi telegram akkauntga yuboring! Maris Academyni tanlaganingizdan minnatdormiz!!
               </p>
               <a
-                href="https://t.me/igofurjonov"
+                href="https://t.me/Maris_admin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 mt-3 text-sm text-[#FFD700] font-medium hover:underline"
               >
-                @igofurjonov
+                @Maris_admin
               </a>
             </div>
           </div>
